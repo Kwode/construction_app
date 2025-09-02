@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "223423532635",
+    "project_id": "build-tracker-274da",
+    "storage_bucket": "build-tracker-274da.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:223423532635:android:720029fc511f613f5fb97e",
+        "android_client_info": {
+          "package_name": "com.example.builder_pro_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa-Pcassja0-5SrCEDLa8lKbt3PxS3qJw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
