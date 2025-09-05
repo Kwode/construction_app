@@ -24,6 +24,10 @@ class ProjectSettingsTab extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('projects')
+            .where(
+          'contractorId',
+          isEqualTo: FirebaseAuth.instance.currentUser!.uid,
+        )
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -74,17 +78,14 @@ class ProjectSettingsTab extends StatelessWidget {
                         .doc(clientId)
                         .get(),
                     builder: (context, clientSnapshot) {
-                      if (clientSnapshot.connectionState ==
-                          ConnectionState.waiting) {
+                      if (clientSnapshot.connectionState == ConnectionState.waiting) {
                         return const Text("Loading client...");
                       }
-                      if (!clientSnapshot.hasData ||
-                          !clientSnapshot.data!.exists) {
+                      if (!clientSnapshot.hasData || !clientSnapshot.data!.exists) {
                         return const Text("Client not found");
                       }
 
-                      final clientData =
-                      clientSnapshot.data!.data() as Map<String, dynamic>;
+                      final clientData = clientSnapshot.data!.data() as Map<String, dynamic>;
                       final clientName = clientData['name'] ??
                           clientData['email'] ??
                           "Unknown Client";
@@ -98,8 +99,7 @@ class ProjectSettingsTab extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              EditProjectScreen(projectId: projectId),
+                          builder: (_) => EditProjectScreen(projectId: projectId),
                         ),
                       );
                     },
@@ -109,7 +109,7 @@ class ProjectSettingsTab extends StatelessWidget {
             },
           );
         },
-      ),
+      ), 
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF007D7B),
         foregroundColor: Colors.white,
