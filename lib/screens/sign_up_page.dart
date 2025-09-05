@@ -49,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       Navigator.pushReplacementNamed(
         context,
-        '/home',
+        '/',
         arguments: _selectedRole,
       );
     } on FirebaseAuthException catch (e) {
