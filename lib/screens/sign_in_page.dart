@@ -42,7 +42,7 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
 
-      Navigator.pushReplacementNamed(context, '/home', arguments: _selectedRole);
+      Navigator.pushReplacementNamed(context, '/', arguments: _selectedRole);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.code)),
