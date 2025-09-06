@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -214,6 +215,41 @@ class _GalleryTabState extends State<GalleryTab> {
     }
   }
 
+  Future<void> _deleteRejectedImage(
+      BuildContext context, String docId, String imageUrl) async {
+    try {
+      // 1. Delete Firestore document
+      await FirebaseFirestore.instance.collection('site_images').doc(docId).delete();
+
+      // 2. Recompute milestone & project progress
+      if (_selectedProjectId != null) {
+        await _recomputeMilestoneAndProject(
+          projectId: _selectedProjectId!,
+          milestoneId: _selectedMilestoneId,
+        );
+      }
+
+      // 3. Notify user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Rejected image deleted'
+            ),
+          ),
+        );
+      }
+    } catch (e, st) {
+      debugPrint("Error deleting rejected image: $e\n$st");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete image: $e')),
+        );
+      }
+    }
+  }
+
+
   void _showUploadDialog() {
     showDialog(
       context: context,
@@ -285,7 +321,8 @@ class _GalleryTabState extends State<GalleryTab> {
               final approved = (data['approved'] ?? false) as bool;
               final rejected = (data['rejected'] ?? false) as bool;
 
-              return Column(
+              // Image card widget
+              final imageCard = Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   GestureDetector(
@@ -307,10 +344,12 @@ class _GalleryTabState extends State<GalleryTab> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.network(imageUrl,
-                              fit: BoxFit.cover,
-                              height: 250,
-                              width: double.infinity),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            height: 250,
+                            width: double.infinity,
+                          ),
                         ),
                         if (!approved && !rejected)
                           _statusBadge("PENDING APPROVAL", Colors.redAccent),
@@ -324,8 +363,31 @@ class _GalleryTabState extends State<GalleryTab> {
                   const SizedBox(height: 16),
                 ],
               );
+
+              // If rejected, wrap in Slidable
+              return rejected
+                  ? Slidable(
+                key: ValueKey(doc.id),
+                endActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      onPressed: (_) async {
+                        await _deleteRejectedImage(context, doc.id, imageUrl);
+                      },
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      label: 'Delete',
+                    ),
+                  ],
+                ),
+                child: imageCard,
+              )
+                  : imageCard;
             },
           );
+
         },
       ),
       floatingActionButton: widget.isClientView
